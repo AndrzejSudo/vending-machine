@@ -1,6 +1,6 @@
 """Python vending machine"""
 
-import random, sys
+import time, sys
 
 try:
     import openpyxl
@@ -17,30 +17,42 @@ def main():
     
     print('Welcome to vending machine.')
     print('Pick snacks using their corresponding numbers.\nWe have:')
-    snacks = getSnacks()[1].keys()
+    snacks_pc, snacks_qt = getSnacks()[0], getSnacks()[1]
+    snacks = snacks_pc.keys()
+    snacks_list = []
+
     for index, item in enumerate(snacks):
+        snacks_list.append(item)
         print(index,':', item, end=' | ')
     print('')
-
-    wallet = 20
+    
+    WALLET = 20
         
     while True:
         
-        if wallet == 0:
+        if WALLET == 0:
             print('You are out of money')
             sys.exit()
         
         print('What do you want to buy?')
-        print(f'You have {WALLET}PLN left')
+        print(f'You have {WALLET} PLN left')
         echo = input('> ')
 
         if echo.isdecimal() and 0 <= int(echo) <= len(snacks)-1:
-            snack = int(echo)
+            SNACK_ID = int(echo)
+            if snacks_qt[snacks_list[SNACK_ID]] == 0:
+                print(f'Machine is out of {snacks_list[SNACK_ID]}.\nPick something else.')
+                continue
             break
         else:
             print('Invalid input, try again')
-        
-    order = buySnacks(snack, wallet)
+    
+    snack_name = snacks_list[SNACK_ID] 
+    snack_pc = round(float(snacks_pc[snacks_list[SNACK_ID]]), 2)
+
+    order = buySnacks(snack_name, snack_pc, snacks_qt, WALLET)
+    print(order, type(order))
+    
 
 def getSnacks():
 
@@ -60,10 +72,41 @@ def getSnacks():
         
     return snacks_price, snacks_quantity
 
-def buySnacks(purchase, wallet):
+def buySnacks(snack_name, snack_pc, snacks_qt, wallet):
 
-
-
-
-main()
+    print(f'You\'ve chosen {snack_name}, which costs {snack_pc} PLN')
+    print('Please insert proper amount of coins or (C)ancel your purchase')
     
+    pay = 0
+
+    while pay != snack_pc:
+        if pay < snack_pc:
+            while True:
+                print(f'{snack_pc-pay} PLN left to pay')
+                amount = input('> ')
+                if amount.upper().startswith('C'):
+                    return None
+
+                try:
+                    amount = round(float(amount), 2)
+                except ValueError:
+                    print('Invalid amount, try again')
+                    continue
+
+                if amount in COINS:
+                    pay += amount
+                    wallet -= pay
+                    break
+                else:
+                    print('Unrecognized coin. Insert Polish zloty nominals')
+        else:
+            print(f'You\'ve inserted {pay-snack_pc} PLN too much.\nReturning change.')
+            pay -= pay-snack_pc
+            
+            wallet += pay-snack_pc
+    
+    snacks_qt[snack_name] -= 1
+    return wallet
+
+if __name__ == '__main__':
+    main()
