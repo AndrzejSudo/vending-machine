@@ -47,7 +47,7 @@ def main():
             elif response == 2:
                 getRefund(bought_snacks, snacks, snacks_list, snacks_pc, snacks_qt)
             elif response == 3:
-                serviceMode(snacks_pc)
+                serviceMode(snacks_pc, snacks_qt)
             else:
                 print('Goodbye, have a nice day')
                 sys.exit()
@@ -210,7 +210,7 @@ def getRefund(bought_snacks, snacks, snacks_list, snacks_pc, snacks_qt):
     else:
         main()
 
-def serviceMode(snacks_price):
+def serviceMode(snacks_price, snacks_qt):
     
     while True:
         print('*****SERVICE MODE*****')
@@ -225,6 +225,12 @@ def serviceMode(snacks_price):
 
         if mode.isdecimal() and int(mode) in range(6):
             mode = int(mode)
+            snacks_wb = openpyxl.load_workbook('snacks.xlsx')
+            snacks_sh = snacks_wb['Sheet1']
+            snacks_list = []
+            for item in snacks_price.keys():
+                    snacks_list.append(item)
+
             if mode == 1:
                 print('Enter how much PLN would you like to add to your wallet')
                 while True:
@@ -243,17 +249,12 @@ def serviceMode(snacks_price):
                 continue
 
             elif mode == 2:
-                snacks_wb = openpyxl.load_workbook('snacks.xlsx')
-                snacks_sh = snacks_wb['Sheet1']
-                snacks_list = []
 
                 counter = 0
-                print(f'Currently there are {len(snacks_price)} snacks, priced as follows:')
+                print(f'Currently there are {len(snacks_price)} snacks priced as follows:')
                 for name, price in snacks_price.items():
                     print(f'{counter}. {name}: {price}; ', end=' ')
                     counter += 1
-                for item in snacks_price.keys():
-                    snacks_list.append(item)
                 print('')
                     
                 while True:
@@ -285,7 +286,42 @@ def serviceMode(snacks_price):
                 continue
 
             elif mode == 3:
-                main()
+
+                counter = 0
+                print(f'Currently there are {len(snacks_qt)} snacks in an amounts as follows:')
+                for name, quantity in snacks_qt.items():
+                    print(f'{counter}. {name}: {quantity}; ', end=' ')
+                    counter += 1
+                print('')
+                    
+                while True:
+                    print('For what snack would you like to change quantity?')
+                    item_id = input('> ')
+                    if item_id.isdecimal() and int(item_id) in range(len(snacks_list)+1):
+                        item_id = int(item_id)
+                        break
+                    else:
+                        print('Invalid input, try again')
+
+                print(f'You\'ve picked {snacks_list[item_id]} which currently in quantity of {snacks_qt[snacks_list[item_id]]}.')
+                while True:
+                    print(f'What will be new quantity for {snacks_list[item_id]}?')
+                    try:
+                        qty = int(input('> '))
+                        if qty > 0:
+                            break
+                        else:
+                            print('Quantity can\'t be negative')
+                    except ValueError:
+                        print('Invalid quantity, try again')
+                        continue
+
+                snacks_sh[f'C{item_id+1}'] = qty             
+                snacks_wb.save('snacks.xlsx')
+                snacks_wb.close()
+                print('Quantity changed')
+                continue
+
             elif mode == 4:
                 main()
             elif mode == 5:
