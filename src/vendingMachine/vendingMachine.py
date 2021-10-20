@@ -47,6 +47,11 @@ def main():
             elif response == 2:
                 getRefund(bought_snacks, snacks, snacks_list, snacks_pc, snacks_qt)
             elif response == 3:
+                print('Entering service mode')
+                for dot in range(3):
+                    time.sleep(1)
+                    print('*', end=' ')
+                print('')
                 serviceMode(snacks_pc, snacks_qt)
             else:
                 print('Goodbye, have a nice day')
@@ -219,11 +224,12 @@ def serviceMode(snacks_price, snacks_qt):
     2. Change snacks prices
     3. Change snacks quantities
     4. Add new snacks
-    5. Exit service mode
+    5. Delete snacks
+    6. Exit service mode
 ************************''')
         mode = input('> ')
 
-        if mode.isdecimal() and int(mode) in range(6):
+        if mode.isdecimal() and int(mode) in range(len(snacks_price)):
             mode = int(mode)
             snacks_wb = openpyxl.load_workbook('snacks.xlsx')
             snacks_sh = snacks_wb['Sheet1']
@@ -232,6 +238,7 @@ def serviceMode(snacks_price, snacks_qt):
                     snacks_list.append(item)
 
             if mode == 1:
+                snacks_wb.close()
                 print('Enter how much PLN would you like to add to your wallet')
                 while True:
                     try:
@@ -264,7 +271,7 @@ def serviceMode(snacks_price, snacks_qt):
                         item_id = int(item_id)
                         break
                     else:
-                        print('Invalid input, try again')
+                        print('Invalid input, use snack numbers')
 
                 print(f'You\'ve picked {snacks_list[item_id]} which currently costs {snacks_price[snacks_list[item_id]]} PLN')
                 while True:
@@ -301,9 +308,9 @@ def serviceMode(snacks_price, snacks_qt):
                         item_id = int(item_id)
                         break
                     else:
-                        print('Invalid input, try again')
+                        print('Invalid input, use snack numbers')
 
-                print(f'You\'ve picked {snacks_list[item_id]} which currently in quantity of {snacks_qt[snacks_list[item_id]]}.')
+                print(f'You\'ve picked {snacks_list[item_id]} which is currently in quantity of {snacks_qt[snacks_list[item_id]]}.')
                 while True:
                     print(f'What will be new quantity for {snacks_list[item_id]}?')
                     try:
@@ -323,12 +330,69 @@ def serviceMode(snacks_price, snacks_qt):
                 continue
 
             elif mode == 4:
-                main()
+
+                counter = 0
+                print(f'Currently there are {len(snacks_list)} snacks:')
+                for index, name in enumerate(snacks_list):
+                    print(f'{index}. {name}; ', end=' ')
+                print('')
+
+                while True:
+                    print('What snack would you like to add?')
+                    new_snack = input('> ')
+                    if not len(new_snack) > 3:
+                        print('Snack name must be longer than 3 characters')
+                        continue
+                    else:
+                        break
+                
+                new_snack_id = f'A{len(snacks_list)+1}'
+                snacks_sh[new_snack_id] = new_snack
+                
+                while True:
+                    print(f'What PLN price {new_snack} will have?')
+                    try:
+                        new_price = float(input('> '))
+                        if new_price > 0:
+                            break
+                        else:
+                            print('Price can\'t be negative')
+                    except ValueError:
+                        print('To set price, use float numbers')
+                        continue
+                
+                new_price_id = f'B{len(snacks_list)+1}'
+                snacks_sh[new_price_id] = new_price
+
+                while True:
+                    print(f'What will be quantity of {new_snack}?')
+                    try:
+                        new_qty = int(input('> '))
+                        if new_qty > 0:
+                            break
+                        else:
+                            print('Quantity can\'t be negative')
+                    except ValueError:
+                        print('To set quantity, use integer numbers')
+                        continue
+                
+                new_qty_id = f'C{len(snacks_list)+1}'
+                snacks_sh[new_qty_id] = new_qty
+
+                snacks_wb.save('snacks.xlsx')
+                snacks_wb.close()
+                print('New entry for your snack:')
+                print(f'{len(snacks_list)+1}. {snacks_sh[new_snack_id].value}: {snacks_sh[new_price_id].value} PLN, {snacks_sh[new_qty_id].value} qt.')
+                continue
+
             elif mode == 5:
+                pass
+
+            elif mode == 6:
                 print('Quitting service mode')
                 for dot in range(3):
                     time.sleep(1)
-                    print('.', end=' ')
+                    print('*', end=' ')
                 print('')
                 main()
 
@@ -336,7 +400,6 @@ def serviceMode(snacks_price, snacks_qt):
             print('Invalid input, pick proper mode number.')
             
 
-    main()
 
 if __name__ == '__main__':
     main()
