@@ -8,9 +8,10 @@ except ModuleNotFoundError:
     print('This program requires openpyxl module, install it with pip')
     sys.exit()
 
-# this vending machine is going to use Polish national currency called "Polish zloty" (code: PLN)
-# available coin nominals are 1gr, 2gr, 5gr, 10gr, 20gr, 50gr, 1zl, 2zl, 5zl
-# this vending machine wont accept coins with denominations smaller than 10gr
+"""Vending machine is using Polish national currency called "Polish zloty" (code: PLN).
+Available coin nominals are 1gr, 2gr, 5gr, 10gr, 20gr, 50gr, 1zl, 2zl, 5zl.
+Denominations smaller than 10gr are not accepted"""
+
 COINS = [0.1, 0.2, 0.5, 1, 2, 5]
 WALLET = 20
 bought_snacks = []
