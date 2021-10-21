@@ -15,15 +15,15 @@ COINS = [0.1, 0.2, 0.5, 1, 2, 5]
 WALLET = 20
 bought_snacks = []
 
-print('Welcome to vending machine.')
-
 def main():
     
     snacks_pc, snacks_qt = getSnacks()[0], getSnacks()[1]
     snacks = snacks_pc.keys()
     snacks_list = []
 
+    print(' VENDING MACHINE '.center(41, '$'))
     print('Purchase snacks using their corresponding numbers:')
+
     for index, item in enumerate(snacks):
         snacks_list.append(item)
         print(index,':', item, end=' | ')
@@ -33,7 +33,7 @@ def main():
 
     print('What would you like to do now?')
     while True:
-        print('''You can:
+        print('''Available options:
     1. Make another purchase
     2. Refund your purchase
     3. Enter service mode
@@ -47,12 +47,12 @@ def main():
             elif response == 2:
                 getRefund(bought_snacks, snacks, snacks_list, snacks_pc, snacks_qt)
             elif response == 3:
-                # print('Entering service mode')
-                # for dot in range(3):
-                #     time.sleep(1)
-                #     print('*', end=' ')
-                # print('')
-                serviceMode(snacks_pc, snacks_qt)
+                print('Entering service mode')
+                for dot in range(3):
+                    time.sleep(1)
+                    print('*', end=' ')
+                print('')
+                serviceMode()
             else:
                 print('Goodbye, have a nice day')
                 sys.exit()
@@ -86,7 +86,6 @@ def pickSnack(bought_snacks, snacks, snacks_pc, snacks_qt, snacks_list):
     global WALLET
 
     while True:
-        
         if WALLET == 0:
             print('You are out of money')
             sys.exit()
@@ -142,7 +141,12 @@ def buySnacks(bought_snacks, snack_id, snack_name, snack_pc, snacks_qt):
                 continue
             else:
                 change = round(pay-snack_pc, 2)
-                print(f'You\'ve inserted {change} PLN too much.\nReturning change.')
+                print(f'You\'ve inserted {change} PLN too much.')
+                print('Returning change', end=' ')
+                for dot in range(3):
+                    time.sleep(1)
+                    print('.', end=' ')
+                print('')
                 pay -= change
                 WALLET += change
                 
@@ -154,11 +158,11 @@ def buySnacks(bought_snacks, snack_id, snack_name, snack_pc, snacks_qt):
     bought_snacks += [snack_id]
 
     print('Purchase confirmed.\nPlease hold', end=' ')
-    # for dot in range(3):
-        # time.sleep(1)
-        # print('.', end=' ')
+    for dot in range(3):
+        time.sleep(1)
+        print('.', end=' ')
     print('\nHere is your snack!')
-    print(f'****{snack_name.upper()}****')
+    print(f'>>>> {snack_name.upper()} <<<<')
     return WALLET
 
 def getRefund(bought_snacks, snacks, snacks_list, snacks_pc, snacks_qt):
@@ -215,18 +219,19 @@ def getRefund(bought_snacks, snacks, snacks_list, snacks_pc, snacks_qt):
     else:
         main()
 
-def serviceMode(snacks_price, snacks_qt):
+def serviceMode():
     
     while True:
-        print('*****SERVICE MODE*****')
-        print('''In service mode you can:
+        print('SERVICE MODE'.center(40, '*'), end='')
+        print('''
     1. Increase your wallet ballance
     2. Change snacks prices
     3. Change snacks quantities
     4. Add new snacks
     5. Remove snacks
-    6. Exit service mode
-************************''')
+    6. Exit service mode''')
+        print(''.center(40, '*'))
+
         mode = input('> ')
 
         if mode.isdecimal() and int(mode) in range(7):
@@ -234,13 +239,23 @@ def serviceMode(snacks_price, snacks_qt):
             snacks_wb = openpyxl.load_workbook('snacks.xlsx')
             snacks_sh = snacks_wb['Sheet1']
             snacks_list = []
-            for item in snacks_price.keys():
-                    snacks_list.append(item)
+            snacks_pc = {}
+            snacks_qt = {}
+
+            n = 1
+            for i in snacks_sh:
+                    snacks_list.append(snacks_sh[f'A{n}'].value)
+                    n+=1
+
+            for name, price, quantity in zip(snacks_sh['A'], snacks_sh['B'], snacks_sh['C']):
+                snacks_pc[name.value] = price.value
+                snacks_qt[name.value] = quantity.value
 
             if mode == 1:
 
                 snacks_wb.close()
                 print('Enter how much PLN would you like to add to your wallet')
+
                 while True:
                     try:
                         amount = float(input('> '))
@@ -254,14 +269,13 @@ def serviceMode(snacks_price, snacks_qt):
                         break
                     else:
                         print('Added amount, can\'t be negative')
-                continue
 
             elif mode == 2:
 
                 counter = 0
-                print(f'Currently there are {len(snacks_price)} snacks priced as follows:')
-                for name, price in snacks_price.items():
-                    print(f'{counter}. {name}: {price}; ', end=' ')
+                print(f'Currently there are {len(snacks_pc)} snacks priced as follows:')
+                for name, price in snacks_pc.items():
+                    print(f'{counter}. {name}: {price} PLN ; ', end=' ')
                     counter += 1
                 print('')
                     
@@ -274,7 +288,8 @@ def serviceMode(snacks_price, snacks_qt):
                     else:
                         print('Invalid input, use snack numbers')
 
-                print(f'You\'ve picked {snacks_list[item_id]} which currently costs {snacks_price[snacks_list[item_id]]} PLN')
+                print(f'You\'ve picked {snacks_list[item_id]} which currently costs {snacks_pc[snacks_list[item_id]]} PLN')
+
                 while True:
                     print(f'What will be new price for {snacks_list[item_id]}?')
                     try:
@@ -291,7 +306,6 @@ def serviceMode(snacks_price, snacks_qt):
                 snacks_wb.save('snacks.xlsx')
                 snacks_wb.close()
                 print('Price changed')
-                continue
 
             elif mode == 3:
 
@@ -312,6 +326,7 @@ def serviceMode(snacks_price, snacks_qt):
                         print('Invalid input, use snack numbers')
 
                 print(f'You\'ve picked {snacks_list[item_id]} which is currently in quantity of {snacks_qt[snacks_list[item_id]]}.')
+
                 while True:
                     print(f'What will be new quantity for {snacks_list[item_id]}?')
                     try:
@@ -329,7 +344,6 @@ def serviceMode(snacks_price, snacks_qt):
                 snacks_wb.save('snacks.xlsx')
                 snacks_wb.close()
                 print('Quantity changed')
-                continue
 
             elif mode == 4:
 
@@ -387,7 +401,6 @@ def serviceMode(snacks_price, snacks_qt):
                 snacks_wb.close()
                 print('New entry for your snack:')
                 print(f'{len(snacks_list)+1}. {snacks_sh[new_snack_id].value}: {snacks_sh[new_price_id].value} PLN, {snacks_sh[new_qty_id].value} qt.')
-                continue
 
             elif mode == 5:
 
@@ -405,26 +418,28 @@ def serviceMode(snacks_price, snacks_qt):
                         break
                     else:
                         print('Invalid input, use integer snacks index numbers')
-                
-                del_snack_wb_id = del_snack + 1
+                                
+                # del_snack_wb_id = del_snack + 1
+                # for letter in ('A', 'B', 'C'):
+                #     snacks_sh[f'{letter}{del_snack_wb_id}'] = None
+                #     for index in range(del_snack_wb_id, len(snacks_list)+1):
+                #         snacks_sh[f'{letter}{index}'] = snacks_sh[f'{letter}{index+1}'].value
+                # basically all of this is done with delete_rows method, 
+                # but at that time I didn't knew about it
+                # so I'm just going to leave this, beacuse I like it
 
-                for letter in ('A', 'B', 'C'):
-                    snacks_sh[f'{letter}{del_snack_wb_id}'] = None
-                    for index in range(del_snack_wb_id, len(snacks_list)+1):
-                        snacks_sh[f'{letter}{index}'] = snacks_sh[f'{letter}{index+1}'].value
-
+                snacks_sh.delete_rows(del_snack+1)
                 snacks_wb.save('snacks.xlsx')
                 snacks_wb.close()
                 print(f'"{snacks_list[del_snack]}" removed')
-                continue
 
             elif mode == 6:
 
                 print('Quitting service mode')
-                # for dot in range(3):
-                #     time.sleep(1)
-                #     print('*', end=' ')
-                # print('')
+                for dot in range(3):
+                    time.sleep(1)
+                    print('*', end=' ')
+                print('')
                 main()
 
         else:
