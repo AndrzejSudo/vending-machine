@@ -47,11 +47,11 @@ def main():
             elif response == 2:
                 getRefund(bought_snacks, snacks, snacks_list, snacks_pc, snacks_qt)
             elif response == 3:
-                print('Entering service mode')
-                for dot in range(3):
-                    time.sleep(1)
-                    print('*', end=' ')
-                print('')
+                # print('Entering service mode')
+                # for dot in range(3):
+                #     time.sleep(1)
+                #     print('*', end=' ')
+                # print('')
                 serviceMode(snacks_pc, snacks_qt)
             else:
                 print('Goodbye, have a nice day')
@@ -66,7 +66,7 @@ def getSnacks():
     try:
         snacks_wb = openpyxl.load_workbook('snacks.xlsx', data_only=True)
     except FileNotFoundError:
-        print('Snacks spreadsheet not found, ensure its in the same directory as program')
+        print('Snacks spreadsheet not found, ensure its in the proper working directory')
         sys.exit()
     
     snacks_sh = snacks_wb['Sheet1']
@@ -224,12 +224,12 @@ def serviceMode(snacks_price, snacks_qt):
     2. Change snacks prices
     3. Change snacks quantities
     4. Add new snacks
-    5. Delete snacks
+    5. Remove snacks
     6. Exit service mode
 ************************''')
         mode = input('> ')
 
-        if mode.isdecimal() and int(mode) in range(len(snacks_price)):
+        if mode.isdecimal() and int(mode) in range(7):
             mode = int(mode)
             snacks_wb = openpyxl.load_workbook('snacks.xlsx')
             snacks_sh = snacks_wb['Sheet1']
@@ -238,6 +238,7 @@ def serviceMode(snacks_price, snacks_qt):
                     snacks_list.append(item)
 
             if mode == 1:
+
                 snacks_wb.close()
                 print('Enter how much PLN would you like to add to your wallet')
                 while True:
@@ -319,6 +320,7 @@ def serviceMode(snacks_price, snacks_qt):
                             break
                         else:
                             print('Quantity can\'t be negative')
+                            continue
                     except ValueError:
                         print('Invalid quantity, try again')
                         continue
@@ -338,7 +340,7 @@ def serviceMode(snacks_price, snacks_qt):
                 print('')
 
                 while True:
-                    print('What snack would you like to add?')
+                    print('What\'s name of new snack would you like to add?')
                     new_snack = input('> ')
                     if not len(new_snack) > 3:
                         print('Snack name must be longer than 3 characters')
@@ -357,6 +359,7 @@ def serviceMode(snacks_price, snacks_qt):
                             break
                         else:
                             print('Price can\'t be negative')
+                            continue
                     except ValueError:
                         print('To set price, use float numbers')
                         continue
@@ -372,6 +375,7 @@ def serviceMode(snacks_price, snacks_qt):
                             break
                         else:
                             print('Quantity can\'t be negative')
+                            continue
                     except ValueError:
                         print('To set quantity, use integer numbers')
                         continue
@@ -386,20 +390,46 @@ def serviceMode(snacks_price, snacks_qt):
                 continue
 
             elif mode == 5:
-                pass
+
+                counter = 0
+                print(f'Currently there are {len(snacks_list)} snacks:')
+                for index, name in enumerate(snacks_list):
+                    print(f'{index}. {name}; ', end=' ')
+                print('')
+
+                while True:
+                    print('Which snack do you want to remove?')
+                    del_snack = input('> ')
+                    if del_snack.isdecimal() and 0 < int(del_snack) <= len(snacks_list):
+                        del_snack = int(del_snack)
+                        break
+                    else:
+                        print('Invalid input, use integer snacks index numbers')
+                
+                del_snack_wb_id = del_snack + 1
+
+                for letter in ('A', 'B', 'C'):
+                    snacks_sh[f'{letter}{del_snack_wb_id}'] = None
+                    for index in range(del_snack_wb_id, len(snacks_list)+1):
+                        snacks_sh[f'{letter}{index}'] = snacks_sh[f'{letter}{index+1}'].value
+
+                snacks_wb.save('snacks.xlsx')
+                snacks_wb.close()
+                print(f'"{snacks_list[del_snack]}" removed')
+                continue
 
             elif mode == 6:
+
                 print('Quitting service mode')
-                for dot in range(3):
-                    time.sleep(1)
-                    print('*', end=' ')
-                print('')
+                # for dot in range(3):
+                #     time.sleep(1)
+                #     print('*', end=' ')
+                # print('')
                 main()
 
         else:
             print('Invalid input, pick proper mode number.')
+   
             
-
-
 if __name__ == '__main__':
     main()
