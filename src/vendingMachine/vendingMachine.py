@@ -253,7 +253,6 @@ def serviceMode():
                 snacks_qt[name.value] = quantity.value
 
             if mode == 1:
-
                 snacks_wb.close()
                 print('Enter how much PLN would you like to add to your wallet')
 
@@ -272,7 +271,6 @@ def serviceMode():
                         print('Added amount, can\'t be negative')
 
             elif mode == 2:
-
                 counter = 0
                 print(f'Currently there are {len(snacks_pc)} snacks priced as follows:')
                 for name, price in snacks_pc.items():
@@ -309,7 +307,6 @@ def serviceMode():
                 print('Price changed')
 
             elif mode == 3:
-
                 counter = 0
                 print(f'Currently there are {len(snacks_qt)} snacks in an amounts as follows:')
                 for name, quantity in snacks_qt.items():
@@ -347,7 +344,6 @@ def serviceMode():
                 print('Quantity changed')
 
             elif mode == 4:
-
                 counter = 0
                 print(f'Currently there are {len(snacks_list)} snacks:')
                 for index, name in enumerate(snacks_list):
@@ -404,7 +400,6 @@ def serviceMode():
                 print(f'{len(snacks_list)+1}. {snacks_sh[new_snack_id].value}: {snacks_sh[new_price_id].value} PLN, {snacks_sh[new_qty_id].value} qt.')
 
             elif mode == 5:
-
                 counter = 0
                 print(f'Currently there are {len(snacks_list)} snacks:')
                 for index, name in enumerate(snacks_list):
@@ -435,7 +430,6 @@ def serviceMode():
                 print(f'"{snacks_list[del_snack]}" removed')
 
             elif mode == 6:
-
                 print('Quitting service mode')
                 for dot in range(3):
                     time.sleep(1)
